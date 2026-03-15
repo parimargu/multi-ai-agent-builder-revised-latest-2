@@ -1,0 +1,94 @@
+# ============================================================
+# Multi AI Agent Builder - Application Configuration
+# ============================================================
+# All services (FastAPI, Celery, Workers) derive config from
+# this single file. Environment variables override these values.
+# ============================================================
+
+app:
+  name: "AgentForge"
+  version: "1.0.0"
+  description: "Multi AI Agent Builder Platform"
+  debug: true
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  reload: true
+
+database:
+  # Choose "postgresql" or "sqlite"
+  type: "postgresql"
+  
+  # For PostgreSQL: "postgresql+asyncpg://user:pass@host:port/dbname"
+  # For SQLite: "sqlite+aiosqlite:///./agentforge.db"
+  url: "postgresql+asyncpg://agentforge:agentforge_secret@localhost:5432/agentforge_db"
+  
+  echo: false
+  pool_size: 20
+  max_overflow: 10
+  
+  # Only used if type is sqlite
+  sqlite_path: "./agentforge.db"
+
+redis:
+  url: "redis://localhost:6379/0"
+  cache_ttl: 3600
+
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672//"
+
+auth:
+  secret_key: "your-super-secret-key-change-in-production-min-32-chars!"
+  algorithm: "HS256"
+  access_token_expire_minutes: 1440
+  refresh_token_expire_days: 30
+
+celery:
+  broker_url: "amqp://guest:guest@localhost:5672//"
+  result_backend: "redis://localhost:6379/1"
+  task_serializer: "json"
+  result_serializer: "json"
+  accept_content: ["json"]
+  timezone: "UTC"
+  task_track_started: true
+  task_time_limit: 300
+  worker_concurrency: 4
+
+llm_providers:
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    default_model: "gpt-4o-mini"
+    base_url: "https://api.openai.com/v1"
+  gemini:
+    api_key: "${GEMINI_API_KEY}"
+    default_model: "gemini-2.0-flash"
+  groq:
+    api_key: "${GROQ_API_KEY}"
+    default_model: "llama-3.3-70b-versatile"
+    base_url: "https://api.groq.com/openai/v1"
+  openrouter:
+    api_key: "${OPENROUTER_API_KEY}"
+    default_model: "meta-llama/llama-3.3-70b-instruct"
+    base_url: "https://openrouter.ai/api/v1"
+  ollama:
+    base_url: "http://localhost:11434"
+    default_model: "llama3.2"
+
+memory:
+  buffer_max_messages: 20
+  persistent_ttl_hours: 720
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d | %(message)s"
+  file: "logs/agentforge.log"
+  max_bytes: 10485760
+  backup_count: 5
+
+cors:
+  allow_origins: ["*"]
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+  allow_credentials: true

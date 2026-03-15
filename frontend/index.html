@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AgentForge - Build powerful multi-AI agent workflows visually">
+    <title>AgentForge — Multi AI Agent Builder</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='url(%23g)'/><defs><linearGradient id='g' x1='0' y1='0' x2='32' y2='32'><stop stop-color='%2300d4aa'/><stop offset='1' stop-color='%237c3aed'/></linearGradient></defs><text x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='18' font-weight='800'>A</text></svg>">
+</head>
+<body>
+    <!-- ===== AUTH PAGE ===== -->
+    <div id="auth-page" class="auth-page active">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-logo">
+                    <div class="logo-icon">A</div>
+                    <h1>AgentForge</h1>
+                    <p>Multi AI Agent Builder Platform</p>
+                </div>
+                <!-- Tabs -->
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="showAuthTab('login')">Sign In</button>
+                    <button class="auth-tab" onclick="showAuthTab('register')">Create Account</button>
+                </div>
+                <!-- Login Form -->
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="login-email">Email</label>
+                        <input class="form-input" type="email" id="login-email" placeholder="you@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <input class="form-input" type="password" id="login-password" placeholder="••••••••" required>
+                    </div>
+                    <button class="btn btn-primary btn-full btn-lg" type="submit" id="login-btn">Sign In</button>
+                </form>
+                <!-- Register Form -->
+                <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="reg-name">Full Name</label>
+                        <input class="form-input" type="text" id="reg-name" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-org">Organization</label>
+                        <input class="form-input" type="text" id="reg-org" placeholder="Acme Corp" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-email">Email</label>
+                        <input class="form-input" type="email" id="reg-email" placeholder="you@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-password">Password</label>
+                        <input class="form-input" type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6">
+                    </div>
+                    <button class="btn btn-primary btn-full btn-lg" type="submit" id="register-btn">Create Account</button>
+                </form>
+                <div class="text-center mt-4">
+                    <button class="theme-toggle" onclick="toggleTheme()" style="margin:0 auto;width:auto;display:inline-flex;">
+                        <span class="nav-icon" id="auth-theme-icon">🌙</span>
+                        <span id="auth-theme-text">Dark Mode</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== APP SHELL ===== -->
+    <div id="app-shell" class="app-container hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon">A</div>
+                <span class="logo-text">AgentForge</span>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a class="nav-item active" onclick="navigateTo('dashboard')" id="nav-dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-label">Dashboard</span>
+                    </a>
+                    <a class="nav-item" onclick="navigateTo('executions')" id="nav-executions">
+                        <span class="nav-icon">▶️</span>
+                        <span class="nav-label">Executions</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Quick Access</div>
+                    <div id="recent-agents-nav"></div>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span class="nav-icon" id="sidebar-theme-icon">🌙</span>
+                    <span class="sidebar-footer-text" id="sidebar-theme-text">Dark Mode</span>
+                </button>
+                <div class="nav-item" onclick="logout()" style="margin-top:var(--space-2);">
+                    <span class="nav-icon">🚪</span>
+                    <span class="nav-label">Logout</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- ===== Dashboard Page ===== -->
+            <div id="page-dashboard" class="page-view">
+                <div class="topbar">
+                    <div class="topbar-left">
+                        <span class="topbar-title">Dashboard</span>
+                    </div>
+                    <div class="topbar-right">
+                        <div class="btn-group" id="dashboard-view-toggle">
+                            <button class="btn btn-secondary btn-sm active" onclick="setDashboardView('grid')" title="Grid View">田</button>
+                            <button class="btn btn-secondary btn-sm" onclick="setDashboardView('list')" title="List View">≡</button>
+                        </div>
+                        <span class="text-sm text-muted" id="user-greeting" style="margin-left: var(--space-4);"></span>
+                    </div>
+                </div>
+                <div class="page-container" id="dashboard-content">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+
+            <!-- ===== Canvas Page ===== -->
+            <div id="page-canvas" class="page-view hidden">
+                <div class="canvas-toolbar">
+                    <div class="canvas-toolbar-group">
+                        <button class="btn btn-ghost btn-sm" onclick="navigateTo('dashboard')" title="Back">← Back</button>
+                        <input class="agent-name-input" id="canvas-agent-name" value="Untitled Agent" onchange="updateAgentName(this.value)">
+                        <span class="badge badge-draft" id="canvas-agent-status">Draft</span>
+                    </div>
+                    <div class="canvas-toolbar-group">
+                        <button class="btn btn-secondary btn-sm" onclick="Canvas.toggleNodePalette()" title="Add Node">➕ Add Node</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Canvas.zoomReset()" title="Fit">🔲 Fit</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Canvas.saveWorkflow()" title="Save">💾 Save</button>
+                        <button class="btn btn-primary btn-sm" onclick="Canvas.executeWorkflow()" title="Execute">▶️ Execute</button>
+                    </div>
+                </div>
+                <div class="canvas-wrapper">
+                    <!-- Node Palette -->
+                    <div class="node-palette" id="node-palette">
+                        <div class="node-palette-header">
+                            <h3>Add Node</h3>
+                            <button class="btn btn-ghost btn-sm" onclick="Canvas.toggleNodePalette()">✕</button>
+                        </div>
+                        <div class="node-palette-search">
+                            <input class="form-input" type="text" id="palette-search" placeholder="Search nodes..." oninput="Canvas.filterPaletteNodes(this.value)">
+                        </div>
+                        <div class="node-palette-list" id="palette-list">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                    <!-- Canvas Area -->
+                    <div class="canvas-area" id="canvas-area">
+                        <svg class="canvas-svg" id="canvas-svg"></svg>
+                        <div class="canvas-nodes-layer" id="canvas-nodes-layer">
+                            <!-- Nodes rendered here -->
+                        </div>
+                    </div>
+                    <!-- Config Panel -->
+                    <div class="config-panel" id="config-panel">
+                        <div class="config-panel-header">
+                            <h3 id="config-panel-title">Node Config</h3>
+                            <button class="btn btn-ghost btn-sm" onclick="Canvas.closeConfigPanel()">✕</button>
+                        </div>
+                        <div class="config-panel-body" id="config-panel-body">
+                            <!-- Filled by JS -->
+                        </div>
+                        <div class="config-panel-footer">
+                            <button class="btn btn-danger btn-sm" onclick="Canvas.deleteSelectedNode()">🗑 Delete</button>
+                            <button class="btn btn-primary btn-sm" onclick="Canvas.applyNodeConfig()">✓ Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Executions Page ===== -->
+            <div id="page-executions" class="page-view hidden">
+                <div class="topbar">
+                    <div class="topbar-left">
+                        <span class="topbar-title">Executions</span>
+                    </div>
+                    <div class="topbar-right">
+                        <button class="btn btn-secondary btn-sm" onclick="loadExecutions()">🔄 Refresh</button>
+                    </div>
+                </div>
+                <div class="page-container" id="executions-content">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ===== New Agent Modal ===== -->
+    <div class="modal-overlay" id="new-agent-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create New Agent</h2>
+                <button class="btn btn-ghost btn-sm" onclick="closeModal('new-agent-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="new-agent-name">Agent Name</label>
+                    <input class="form-input" type="text" id="new-agent-name" placeholder="My AI Agent" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="new-agent-desc">Description</label>
+                    <textarea class="form-input" id="new-agent-desc" placeholder="What does this agent do?" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('new-agent-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createNewAgent()">Create Agent</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/nodes.js"></script>
+    <script src="/js/canvas.js"></script>
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/execution.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
